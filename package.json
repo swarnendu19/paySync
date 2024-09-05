@@ -1,0 +1,19 @@
+{
+  "name": "uni-pay",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/swarnendu19/uni-pay.git"
+  },
+  "author": "Swarnendu Maity",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/swarnendu19/uni-pay/issues"
+  },
+  "homepage": "https://github.com/swarnendu19/uni-pay#readme",
+  "description": ""
+}
