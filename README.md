@@ -27,7 +27,17 @@ npm install paysync
 ```typescript
  // Stripe
 const stripe = new PaySync.Stripe(process.env.STRIPE_SECRET_KEY!);
-const stripeRedirectUrl = await stripePaymentProcessor.generateCheckoutUrl(stripePayload);
+
+//This is just an Example data
+const checkoutDetails = {
+  payment_method_types: ['card'],
+  line_items: [{ price: 'price_1HjHdV2eZvKYlo2CtLzk2uIX', quantity: 1 }],
+  mode: 'payment',
+  success_url: 'https://example.com/success',
+  cancel_url: 'https://example.com/cancel',
+};
+
+const checkoutUrl = await stripe.generatePaymentURL(checkoutDetails);
 ```
 ## Webhook
 
@@ -35,24 +45,29 @@ const stripeRedirectUrl = await stripePaymentProcessor.generateCheckoutUrl(strip
 // Stripe
 const stripe = new PaySync.Stripe(process.env.STRIPE_SECRET_KEY!);
 
-const sign = c.req.header("Stripe-Signature");
-if (!sign) throw new Error("No Signature");
+const signatureHeader = context.req.header("Stripe-Signature");
+if (!signatureHeader) throw new Error("No Signature");
 
-const webhookEvent = await stripe.verifySignature({
-  signature: sign,
-  secret: "PUT YOUR WEBHOOK SECRET HERE",
-  body: await c.req.text(),
-});
+const webhookPayload = {
+  signatureHeader: signatureHeader,
+  webhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,  
+  requestBody: await context.req.text(),  
+};
 
+const webhookEvent = await stripe.validateWebhookSignature(webhookPayload);
+ 
 if ("error" in webhookEvent) throw new Error(webhookEvent.error.message);
 
 switch (webhookEvent.event.type) {
   case "checkout.session.async_payment_succeeded":
+    // Handle successful payment
     break;
 
   default:
+    // Handle other event types if needed
     break;
 }
+
 ```
 
 ## Contributing

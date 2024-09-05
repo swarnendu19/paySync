@@ -1,6 +1,6 @@
 {
   "name": "paysync",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.js",
   "type": "module",
   "scripts": {
@@ -15,14 +15,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/swarnendu19/uni-pay.git"
+    "url": "git+https://github.com/swarnendu19/PaySync.git"
   },
   "author": "Swarnendu Maity",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/swarnendu19/uni-pay/issues"
+    "url": "https://github.com/swarnendu19/PaySync/issues"
   },
-  "homepage": "https://github.com/swarnendu19/uni-pay#readme",
+  "homepage": "https://github.com/swarnendu19/PaySync#readme",
   "description": "",
   "devDependencies": {
     "@types/jest": "^29.5.12",
