@@ -1,6 +1,6 @@
 {
   "name": "paysync",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "main": "index.js",
   "type": "module",
   "scripts": {
@@ -12,6 +12,9 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
   },
   "repository": {
     "type": "git",
