@@ -1,5 +1,5 @@
 {
-  "name": "uni-pay",
+  "name": "paysync",
   "private": true,
   "scripts": {
     "build": "turbo build",
