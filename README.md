@@ -1,81 +1,107 @@
-# Turborepo starter
+# PaySync
 
-This is an official starter Turborepo.
+PaySync is a robust TypeScript library designed to offer a unified interface for seamless integration with multiple payment providers, including Stripe, LemonSqueezy, RozerPay and others. By using PaySync, developers can effortlessly switch between different payment gateways without the need to overhaul their existing payment logic. This simplifies the process of managing diverse payment systems, providing flexibility and scalability while maintaining a consistent and efficient codebase.
 
-## Using this example
+## Features
 
-Run the following command:
+- **PaySync API:** A unified interface to interact seamlessly with multiple payment providers through a single class..
+- **Provider Agnostic:** Switch between different payment providers with minimal code changes.
+- **Easy Integration:** Simplifies the integration process with well-documented methods and examples.
+- **Extensible:** Easily extendable to accommodate new payment providers, ensuring scalability and future-proofing the system.
 
-```sh
-npx create-turbo@latest
+## Providers
+
+- **Stripe:** (Checkout, Webhook).
+- **RazorPay:** (comming soon).
+
+## Installation
+
+To install the package, run the following command:
+
+```bash
+npm install paysync
 ```
 
-## What's inside?
+## Usage
 
-This Turborepo includes the following packages/apps:
+```typescript
+// Stripe
+const stripe = new PaySync.Stripe(process.env.STRIPE_SECRET_KEY!);
 
-### Apps and Packages
+//This is just an Example data
+const checkoutDetails = {
+  payment_method_types: ["card"],
+  line_items: [{ price: "price_1HjHdV2eZvKYlo2CtLzk2uIX", quantity: 1 }],
+  mode: "payment",
+  success_url: "https://example.com/success",
+  cancel_url: "https://example.com/cancel",
+};
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-pnpm build
+const checkoutUrl = await stripe.generatePaymentURL(checkoutDetails);
 ```
 
-### Develop
+## Webhook
 
-To develop all apps and packages, run the following command:
+```typescript
+// Stripe
+const stripe = new PaySync.Stripe(process.env.STRIPE_SECRET_KEY!);
 
+const signatureHeader = context.req.header("Stripe-Signature");
+if (!signatureHeader) throw new Error("No Signature");
+
+const webhookPayload = {
+  signatureHeader: signatureHeader,
+  webhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
+  requestBody: await context.req.text(),
+};
+
+const webhookEvent = await stripe.validateWebhookSignature(webhookPayload);
+
+if ("error" in webhookEvent) throw new Error(webhookEvent.error.message);
+
+switch (webhookEvent.event.type) {
+  case "checkout.session.async_payment_succeeded":
+    // Handle successful payment
+    break;
+
+  default:
+    // Handle other event types if needed
+    break;
+}
 ```
-cd my-turborepo
-pnpm dev
-```
 
-### Remote Caching
+## Contributing
 
-Turborepo can use a technique known as [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+We welcome contributions to PaySync! If you'd like to help improve this package, here's how you can contribute:
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup), then enter the following commands:
+1. **Fork the Repository**: Start by forking the [PaySync repository](https://github.com/swarnendu19/PaySync) on GitHub.
 
-```
-cd my-turborepo
-npx turbo login
-```
+2. **Clone Your Fork**: Clone your fork to your local machine for development.
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+   ```bash
+   git clone https://github.com/swarnendu19/PaySync
+   ```
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+3. Create a Branch: Create a new branch for your feature or bug fix.
 
-```
-npx turbo link
-```
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
 
-## Useful Links
+4. **Create**: `apps` directory and setup a nodejs project inside the `apps` directory.
 
-Learn more about the power of Turborepo:
+5. **Add Dependencies**: Add `paysync` as a dependencies to the `apps/nodejs-project/package.json` file.
 
-- [Tasks](https://turbo.build/repo/docs/core-concepts/monorepos/running-tasks)
-- [Caching](https://turbo.build/repo/docs/core-concepts/caching)
-- [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching)
-- [Filtering](https://turbo.build/repo/docs/core-concepts/monorepos/filtering)
-- [Configuration Options](https://turbo.build/repo/docs/reference/configuration)
-- [CLI Usage](https://turbo.build/repo/docs/reference/command-line-reference)
+6. **Make Changes**: Implement your changes or improvements to the codebase.
+7. **Test Your Changes**: Ensure that your changes don't break any existing functionality and add tests if necessary.
+8. **Commit Your Changes**: Commit your changes with a clear and descriptive commit message.
+   ```bash
+   git commit -m "Add a brief description of your changes"
+   ```
+9. **Push to Your Fork**: Push your changes to your GitHub fork
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+10. **Submit a Pull Request**: Go to the original PaySync repository and submit a pull request with a clear description of your changes.
+
+Thank You
