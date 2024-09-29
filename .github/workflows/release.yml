@@ -1,64 +1,53 @@
-name: Release
+name: Release Packages
 
 on:
   push:
     branches:
-      - main
-
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+      - main # Only run on push to the main branch
 
 jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: write
-      packages: write
-      pull-requests: write
-      issues: read
 
     steps:
-      # Step 1: Checkout the repository
-      - name: Checkout Repo
+      # Step 1: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # Step 2: Set up Node.js (use the Node.js version your project supports)
-      - name: Setup Node.js 20.x
+      # Step 2: Setup Node.js environment
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 20.x
+          node-version: 20.x # Use your preferred Node.js version
 
-      # Step 3: Cache node_modules to optimize build times
-      - name: Cache npm modules
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-npm-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-npm-
-
-      # Step 4: Install dependencies using npm
+      # Step 3: Install dependencies for all packages in the Turborepo
       - name: Install Dependencies
-        run: npm ci
+        run: npm install
 
-      # Step 5: Run tests (if applicable)
+      # Step 4: Setup Turborepo Cache
+      - name: Setup Turborepo
+        run: npx turbo run build --filter=packages/node # Customize this to target the specific package
+
+      # Step 5: Run Tests (if applicable)
       - name: Run Tests
-        run: npm test
+        run: npm test # Customize if needed
 
-      # Step 6: Check for any changesets and create a release pull request
-      - name: Create Release Pull Request or Publish to npm
+      # Step 6: Create Release Pull Request or Publish to npm using Changesets
+      - name: Create Release PR or Publish to npm
         id: changesets
         uses: changesets/action@v1
         with:
-          publish: npm release
+          publish: npm # Automatically publish to npm
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }} # Token for npm registry
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # GitHub token for creating PRs or managing releases
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }} # Your npm authentication token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # GitHub token for PRs
 
-      # Step 7: Publish the package to npm (only if publishing is needed)
+      # Step 7: Navigate to the package directory and publish to npm
       - name: Publish to npm
         if: steps.changesets.outputs.published == 'true'
-        run: npm publish
+        run: |
+          cd packages/node  # Navigate to the package you want to publish
+          npm publish
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # npm registry auth token
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
