@@ -21,29 +21,29 @@ jobs:
         with:
           node-version: 20.x # Use your preferred Node.js version
 
-      # Step 3: Install dependencies for all packages in the Turborepo
+      # Step 3: Install dependencies for the Turborepo
       - name: Install Dependencies
         run: npm install
 
-      # Step 4: Setup Turborepo Cache
-      - name: Setup Turborepo
-        run: npx turbo run build --filter=packages/node # Customize this to target the specific package
+      # Step 4: Build the package (paysync) located in packages/node
+      - name: Build paysync package
+        run: npx turbo run build --filter=packages/node # Adjust path if needed
 
-      # Step 6: Create Release Pull Request or Publish to npm using Changesets
+      # Step 5: Create Release PR or Publish to npm using Changesets
       - name: Create Release PR or Publish to npm
         id: changesets
         uses: changesets/action@v1
         with:
-          publish: npm # Automatically publish to npm
+          publish: npm # Automatically publish to npm if a release is needed
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }} # Your npm authentication token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # GitHub token for PRs
 
-      # Step 7: Navigate to the package directory and publish to npm
+      # Step 6: Publish the package to npm if changesets detected a new release
       - name: Publish to npm
         if: steps.changesets.outputs.published == 'true'
         run: |
-          cd packages/node  # Navigate to the package you want to publish
-          npm publish
+          cd packages/node  # Navigate to the correct directory
+          npm publish  # Publish the package to npm
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
