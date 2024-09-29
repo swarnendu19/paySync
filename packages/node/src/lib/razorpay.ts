@@ -1,66 +1,36 @@
-import { IRazorpayAuthResponse, IRazorpayOptions, IRazorpayOrderResponse, IRazorpayPayload } from "../types/razorpayTypes";
-import { PayFetch } from "../utils/fetch";
+import axios from 'axios';
+import { PaymentGateway, PaymentConfig } from '../types/razorpayTypes';
 
-export class Razorpay extends PayFetch {
-  constructor(private options: IRazorpayOptions) {
-    super();
+export class Razorpay implements PaymentGateway {
+  private apiKey: string = '';
+  private secretKey: string = '';
+
+  initialize(config: PaymentConfig): void {
+    this.apiKey = config.apiKey || '';
+    this.secretKey = config.secretKey || '';
   }
 
-  private getApiBaseUrl() {
-    if (this.options.sandbox) {
-      return "https://api.sandbox.razorpay.com";
-    }
-    return "https://api.razorpay.com";
-  }
-
-  private getKeyId() {
-    return this.options.keyId;
-  }
-
-  private getKeySecret() {
-    return this.options.keySecret;
-  }
-
-  private getApiOrderUrl() {
-    return `${this.getApiBaseUrl()}/v1/orders`;
-  }
-
-  async getAccessToken() {
-    const url = `${this.getApiBaseUrl()}/v1/auth`;
-
-    const auth = btoa(`${this.getKeyId()}:${this.getKeySecret()}`);
-
-    const [response] = await this.jsonFetch<IRazorpayAuthResponse>(url, {
-      method: "POST",
-      headers: {
-        Authorization: `Basic ${auth}`,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: "grant_type=client_credentials",
-    });
-
-    return response.access_token;
-  }
-
-  async createOrder(payload: IRazorpayPayload) {
-    const accessToken = await this.getAccessToken();
-
-    const [res] = await this.jsonFetch<IRazorpayOrderResponse>(
-      this.getApiOrderUrl(),
-      {
-        method: "POST",
-        body: JSON.stringify(payload),
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
+  async charge(amount: number, currency: string, customerDetails: any): Promise<any> {
+    try {
+      const response = await axios.post(
+        'https://api.razorpay.com/v1/orders',
+        {
+          amount: amount * 100,
+          currency: currency,
+          receipt: `receipt#${Math.floor(Math.random() * 100)}`,
+          payment_capture: 1,
         },
-      }
-    );
-
-    if (!res.id) {
-      throw new Error("Failed to create order");
+        {
+          auth: {
+            username: this.apiKey,
+            password: this.secretKey,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      //@ts-ignore
+      throw new Error(`Razorpay charge failed: ${error.response?.data?.error?.description || error.message}`);
     }
-
-    return res;
   }
 }
