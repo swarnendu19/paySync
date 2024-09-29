@@ -9,6 +9,7 @@
     "release": "turbo build && changeset publish"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.27.8",
     "prettier": "^3.2.5",
     "turbo": "^2.1.2",
     "typescript": "^5.4.5"
