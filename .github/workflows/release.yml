@@ -1,0 +1,64 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+      packages: write
+      pull-requests: write
+      issues: read
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Node.js (use the Node.js version your project supports)
+      - name: Setup Node.js 20.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+
+      # Step 3: Cache node_modules to optimize build times
+      - name: Cache npm modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      # Step 4: Install dependencies using npm
+      - name: Install Dependencies
+        run: npm ci
+
+      # Step 5: Run tests (if applicable)
+      - name: Run Tests
+        run: npm test
+
+      # Step 6: Check for any changesets and create a release pull request
+      - name: Create Release Pull Request or Publish to npm
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          publish: npm release
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }} # Token for npm registry
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # GitHub token for creating PRs or managing releases
+
+      # Step 7: Publish the package to npm (only if publishing is needed)
+      - name: Publish to npm
+        if: steps.changesets.outputs.published == 'true'
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # npm registry auth token
