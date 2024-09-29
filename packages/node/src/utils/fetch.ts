@@ -1,4 +1,5 @@
 import axios from "axios";
+import { AxiosRequestConfig } from "axios";
 
 type TFetchOptions = {
   method?: string;
@@ -28,3 +29,6 @@ export class PayFetch {
     return [req.data, req.request];
   }
 }
+
+
+ 
