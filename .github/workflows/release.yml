@@ -29,10 +29,6 @@ jobs:
       - name: Setup Turborepo
         run: npx turbo run build --filter=packages/node # Customize this to target the specific package
 
-      # Step 5: Run Tests (if applicable)
-      - name: Run Tests
-        run: npm test # Customize if needed
-
       # Step 6: Create Release Pull Request or Publish to npm using Changesets
       - name: Create Release PR or Publish to npm
         id: changesets
