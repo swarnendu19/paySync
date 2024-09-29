@@ -3,7 +3,7 @@ name: Release Packages
 on:
   push:
     branches:
-      - main # Only run on push to the main branch
+      - main
 
 jobs:
   release:
@@ -25,16 +25,16 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      # Step 4: Build the package (paysync) located in packages/node
+      # Step 4: Build the paysync package located in packages/node
       - name: Build paysync package
-        run: npx turbo run build --filter=packages/node # Adjust path if needed
+        run: npx turbo run build --filter=paysync
 
       # Step 5: Create Release PR or Publish to npm using Changesets
       - name: Create Release PR or Publish to npm
         id: changesets
         uses: changesets/action@v1
         with:
-          publish: npm # Automatically publish to npm if a release is needed
+          publish: npm
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }} # Your npm authentication token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # GitHub token for PRs
@@ -43,7 +43,7 @@ jobs:
       - name: Publish to npm
         if: steps.changesets.outputs.published == 'true'
         run: |
-          cd packages/node  # Navigate to the correct directory
-          npm publish  # Publish the package to npm
+          cd packages/node  
+          npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
